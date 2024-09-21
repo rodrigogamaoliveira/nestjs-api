@@ -6,10 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  UseInterceptors,
+  CacheTTL,
+  CacheInterceptor,
 } from "@nestjs/common";
 import { ProjectService } from "../services/project.service";
 import { CreateProjectDto } from "../dto/create-project.dto";
 import { UpdateProjectDto } from "../dto/update-project.dto";
+import { FilterDto } from "src/modules/pagination/dto/filter.dto";
+
 @Controller("projects")
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectService) { }
@@ -22,8 +28,10 @@ export class ProjectsController {
   }
 
   @Get()
-  findAll() {
-    return this.projectsService.findAll();
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000)
+  findAll(@Query() filter?: FilterDto) {
+    return this.projectsService.findAllPaginated(filter)  
   }
 
   @Get(":id")
